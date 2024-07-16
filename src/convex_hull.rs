@@ -11,7 +11,7 @@ Compute the convex hull of a polygon
 
 The convex hull is the smallest convex polygon that contains all the points of the polygon
 */
-fn convex_hull(polygon: Polygon) -> PolygonOwned {
+fn convex_hull(polygon: &Polygon) -> PolygonOwned {
     let mut convex_hull = Vec::with_capacity(polygon.len()); // The convex hull is at most the size of the polygon
     let mut polygon = polygon.to_vec(); // We need to sort the polygon, so we need to own it
 
@@ -85,23 +85,23 @@ fn convex_hull(polygon: Polygon) -> PolygonOwned {
 Compute the area of the convex hull of a polygon
  */
 pub fn convex_area(polygon: Polygon) -> f64 {
-    area(&convex_hull(polygon))
+    area(&convex_hull(&polygon))
 }
 
 /**
 Compute the perimeter of the convex hull of a polygon
  */
 pub fn convex_perimeter(polygon: Polygon) -> f64 {
-    perimeter(&convex_hull(polygon))
+    perimeter(&convex_hull(&polygon))
 }
 
 /**
 Compute the deviation of the convex hull of a polygon
  */
 pub fn convex_deviation(polygon: Polygon) -> f64 {
-    let convex_hull = convex_hull(polygon);
+    let convex_hull = convex_hull(&polygon);
     let convex_area = area(&convex_hull);
-    let area = area(&convex_hull);
+    let area = area(&polygon);
     (convex_area - area) / area
 }
 
@@ -116,9 +116,9 @@ pub struct ConvexHullFeatures {
 Compute the features of the convex hull of a polygon
  */
 pub fn convex_hull_features(polygon: Polygon) -> ConvexHullFeatures {
-    let convex_hull = convex_hull(polygon);
+    let convex_hull = convex_hull(&polygon);
     let convex_area = area(&convex_hull);
-    let area = area(&convex_hull);
+    let area = area(&polygon);
     ConvexHullFeatures {
         area: convex_area,
         perimeter: perimeter(&convex_hull),
