@@ -1,5 +1,5 @@
 /*!
-Contains the feature function related to the related elipse of a polygon
+Contains the feature function related to the related ellipse of a polygon
  */
 
 use nalgebra::{Matrix1xX, Matrix3, Matrix3xX};
@@ -12,7 +12,7 @@ use crate::{
 const C_INV: [f64; 3 * 3] = [0.0, 0.0, 0.5, 0.0, -1.0, 0.0, 0.5, 0.0, 0.0];
 
 /**
-Fit an elipse to a polygon using a scanline algorythe and the "Numerically stable direct least squares fitting of ellipses" algorythm by Halir and Flusser
+Fit an ellipse to a polygon using a scanline algorythe and the "Numerically stable direct least squares fitting of ellipses" algorythm by Halir and Flusser
 
 ## Example
 
@@ -106,7 +106,7 @@ pub fn fit_ellipse(polygon: Polygon) -> (f64, f64, f64, Point) {
 
     let den = b * b - a * c;
 
-    assert!(den < 0.0, "Coefs don't match the elipse equation");
+    assert!(den < 0.0, "Coefs don't match the ellipse equation");
 
     let x0 = (c * d - b * f) / den;
     let y0 = (a * f - b * d) / den;
@@ -138,7 +138,7 @@ pub fn fit_ellipse(polygon: Polygon) -> (f64, f64, f64, Point) {
 }
 
 /**
-Compute the eccentricity of the related elipse of a polygon
+Compute the eccentricity of the related ellipse of a polygon
 
 ```rust
 use geometric_features::{related_ellipse::eccentricity, Point, Polygon};
@@ -161,7 +161,7 @@ pub fn eccentricity(polygon: Polygon) -> f64 {
 }
 
 /**
-Compute the minor and major axis of the related elipse of a polygon
+Compute the minor and major axis of the related ellipse of a polygon
 
 ```rust
 use geometric_features::related_ellipse::principal_axes;
@@ -184,7 +184,7 @@ pub fn principal_axes(polygon: Polygon) -> (f64, f64) {
     (major_axis * 2.0, minor_axis * 2.0)
 }
 
-fn eliptic_deviation_(
+fn elliptic_deviation_(
     polygon: Polygon,
     precision: usize,
     hmajor_axis: f64,
@@ -233,11 +233,11 @@ fn eliptic_deviation_(
 }
 
 /**
-Compute the deviation beween the polygon and the related elipse using a scanline algorithm.
+Compute the deviation beween the polygon and the related ellipse using a scanline algorithm.
 `precision` is the number of lines used to compute the deviation. The more lines, the more precise the result will be.
 
 ```rust
-use geometric_features::related_ellipse::eliptic_deviation;
+use geometric_features::related_ellipse::elliptic_deviation;
 let polygon: Vec<(f64,f64)> = vec![
     ( 8.04,  2.68),
     ( 5.4,   4.4 ),
@@ -248,12 +248,12 @@ let polygon: Vec<(f64,f64)> = vec![
     ( 10.0,  2.42),
     ( 8.86,  4.14)
 ];
-assert_eq!(eliptic_deviation(&polygon, 100), 0.5378961702988894);
+assert_eq!(elliptic_deviation(&polygon, 100), 0.5378961702988894);
 ```
  */
-pub fn eliptic_deviation(polygon: Polygon, precision: usize) -> f64 {
+pub fn elliptic_deviation(polygon: Polygon, precision: usize) -> f64 {
     let (major_axis, minor_axis, orientation, center) = fit_ellipse(polygon);
-    eliptic_deviation_(
+    elliptic_deviation_(
         polygon,
         precision,
         major_axis,
@@ -264,24 +264,24 @@ pub fn eliptic_deviation(polygon: Polygon, precision: usize) -> f64 {
 }
 
 /**
-Contains the features of the related elipse of a polygon
+Contains the features of the related ellipse of a polygon
  */
 #[derive(Debug, PartialEq, Clone)]
-pub struct ElipseFeatures {
+pub struct EllipseFeatures {
     pub major_axis: f64,
     pub minor_axis: f64,
     pub orientation: f64,
     pub center: (f64, f64),
 
     pub eccentricity: f64,
-    pub eliptic_deviation: f64,
+    pub elliptic_deviation: f64,
 }
 
 /**
-Compute the features of the related elipse of a polygon. Usefull to avoid recomputing the related elipse multiple times.
+Compute the features of the related ellipse of a polygon. Usefull to avoid recomputing the related ellipse multiple times.
 
 ```rust
-use geometric_features::related_ellipse::{elipse_features, ElipseFeatures};
+use geometric_features::related_ellipse::{ellipse_features, EllipseFeatures};
 
 let polygon = [
     (-10.34, -11.32),
@@ -301,26 +301,26 @@ let polygon2: Vec<(f64,f64)> = vec![
     ( 8.86,  4.14)
 ];
 
-let features = elipse_features(&polygon, 200);
+let features = ellipse_features(&polygon, 200);
 assert_eq!(features.major_axis, 23.247229367609776);
 assert_eq!(features.minor_axis, 18.561527921248285);
 assert_eq!(features.orientation, 1.1140533990057633);
 assert_eq!(features.center, (3.816556476304908, 2.4698470796765917));
 assert_eq!(features.eccentricity, 0.6020738096588001);
-assert_eq!(features.eliptic_deviation, 3.1033783265455486);
+assert_eq!(features.elliptic_deviation, 3.1033783265455486);
 
-let features = elipse_features(&polygon2, 200);
+let features = ellipse_features(&polygon2, 200);
 assert_eq!(
-    ElipseFeatures { major_axis: 4.753561242017376, minor_axis: 4.586863912470367, orientation: 3.999506964053637, center: (8.487782302188705, 5.068631718638504), eccentricity: 0.26249954212114796, eliptic_deviation: 0.5379829218188382 },
+    EllipseFeatures { major_axis: 4.753561242017376, minor_axis: 4.586863912470367, orientation: 3.999506964053637, center: (8.487782302188705, 5.068631718638504), eccentricity: 0.26249954212114796, elliptic_deviation: 0.5379829218188382 },
     features
 );
 
 ```
  */
-pub fn elipse_features(polygon: Polygon, precision: usize) -> ElipseFeatures {
+pub fn ellipse_features(polygon: Polygon, precision: usize) -> EllipseFeatures {
     let (major_axis, minor_axis, orientation, center) = fit_ellipse(polygon);
     let eccentricity = (1.0 - minor_axis.powi(2) / major_axis.powi(2)).sqrt();
-    let eliptic_deviation = eliptic_deviation_(
+    let elliptic_deviation = elliptic_deviation_(
         polygon,
         precision,
         major_axis,
@@ -330,13 +330,13 @@ pub fn elipse_features(polygon: Polygon, precision: usize) -> ElipseFeatures {
     );
     let major_axis = major_axis * 2.0;
     let minor_axis = minor_axis * 2.0;
-    ElipseFeatures {
+    EllipseFeatures {
         major_axis,
         minor_axis,
         orientation,
         center,
         eccentricity,
-        eliptic_deviation,
+        elliptic_deviation,
     }
 }
 
@@ -355,7 +355,7 @@ mod test {
     ];
 
     #[test]
-    fn regression_test_fit_elipse() {
+    fn regression_test_fit_ellipse() {
         let (major_axis, minor_axis, orientation, center) = fit_ellipse(&TEST_POLYGON);
 
         assert_eq!(major_axis, 11.623614683804888);
@@ -368,8 +368,8 @@ mod test {
     const POLYGON_SIZES: [usize; 9] = [4, 8, 16, 32, 64, 128, 256, 512, 1024];
 
     #[test]
-    fn bench_equivalent_elipse() {
-        println!("Benchmarking equivalent_elipse");
+    fn bench_equivalent_ellipse() {
+        println!("Benchmarking equivalent_ellipse");
         println!("size, time");
         for &size in POLYGON_SIZES.iter() {
             let polygon = build_random_polygon(size);
@@ -402,7 +402,7 @@ mod test {
             for s in 1..100 {
                 let major_axis = major_axis * (s as f64 / 50.0);
                 let minor_axis = minor_axis * (s as f64 / 50.0);
-                let elliptic_deviation = eliptic_deviation_(
+                let elliptic_deviation = elliptic_deviation_(
                     &polygon,
                     200,
                     major_axis,
